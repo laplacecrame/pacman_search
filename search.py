@@ -170,13 +170,43 @@ def depthFirstSearch(problem):
     #     #     print temp.reverse()
     #     #     print Directions.REVERSE[temp[0]]
     #     #     path.append([Directions.REVERSE[item] for item in temp.reverse()])
-    # #retuen FAILURE
-    return  [s, s, w, s, w, w, s, w]
+
+    #retuen FAILURE
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    # util.raiseNotDefined()
+
+    frontier = util.Queue()
+    explored = set()
+
+    if problem.isGoalState(problem.getStartState()): return []
+    explored.add(problem.getStartState())
+    for child in problem.getSuccessors(problem.getStartState()):
+        newchild = child + ([child[1]],)
+        frontier.push(newchild)
+        explored.add(child[0])
+    while not frontier.isEmpty():
+        # frontier.printself()
+        node = frontier.pop()
+        # explored.add(node[0])
+        # print node
+        if problem.isGoalState(node[0]):
+            # print node, "is the goal"
+            # print path
+            return node[3]
+        for child in problem.getSuccessors(node[0]):
+            trace = list(node[3])
+            trace.append(child[1])
+            newchild = child + (trace,)
+            if child[0] not in explored:
+                # print "*"*64
+                # print trace
+                frontier.push(newchild)
+                explored.add(child[0])
+
+    #retuen FAILURE
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
