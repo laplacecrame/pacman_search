@@ -211,7 +211,48 @@ def breadthFirstSearch(problem):
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    # util.raiseNotDefined()
+
+    frontier = util.PriorityQueue()
+    explored = set()
+    path = {}
+    cost = {}
+
+    if problem.isGoalState(problem.getStartState()): return []
+    explored.add(problem.getStartState())
+    for child in problem.getSuccessors(problem.getStartState()):
+        # newchild = child + ([child[1]], child[2])
+        # frontier.push(newchild, newchild[4])
+        path[child[0]] = [child[1]]
+        cost[child[0]] = child[2]
+        frontier.push(child[0], cost[child[0]])
+
+        # explored.add(child[0])
+    while not frontier.isEmpty():
+        # frontier.printself()
+        node = frontier.pop()
+        explored.add(node)
+        # print node
+        if problem.isGoalState(node):
+            # print node, "is the goal"
+            # print path
+            return path[node]
+        for child in problem.getSuccessors(node):
+            # trace = list(node[3])
+            # trace.append(child[1])
+            # newchild = child + (trace, node[4] + child[2])
+            if child[0] not in explored:
+                # print "*"*64
+                # print trace
+                # frontier.push(newchild, newchild[4])
+                tempcost = cost[node] + child[2]
+                if not cost.has_key(child[0]) or cost[child[0]] > tempcost:
+                    cost[child[0]] = tempcost
+                    path[child[0]] = path[node] + [child[1]]
+                frontier.update(child[0], cost[child[0]])
+                # explored.add(child[0])
+
+    # retuen FAILURE
 
 def nullHeuristic(state, problem=None):
     """
