@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -87,7 +87,91 @@ def depthFirstSearch(problem):
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    #util.raiseNotDefined()
+
+    #info
+    # print "Start:", problem.getStartState()
+    # print "Is the start a goal?", problem.isGoalState(problem.getStartState())
+    # print "Start's successors:", problem.getSuccessors(problem.getStartState())
+    # print "*"*68
+
+    # from game import Directions
+    # e = Directions.EAST
+    # s = Directions.SOUTH
+    # w = Directions.WEST
+    # n = Directions.NORTH
+
+    frontier = util.Stack()
+    explored = set()
+
+    if problem.isGoalState(problem.getStartState()): return []
+    explored.add(problem.getStartState())
+    for child in problem.getSuccessors(problem.getStartState()):
+        newchild = child + ([child[1]],)
+        frontier.push(newchild)
+    while not frontier.isEmpty():
+        node = frontier.pop()
+        explored.add(node[0])
+        # print node
+        if problem.isGoalState(node[0]):
+            # print node, "is the goal"
+            # print path
+            return node[3]
+        for child in problem.getSuccessors(node[0]):
+            trace = list(node[3])
+            trace.append(child[1])
+            newchild = child + (trace,)
+            if child[0] not in explored:
+                # print "*"*64
+                # print trace
+                frontier.push(newchild)
+    #retuen FAILURE
+
+    # frontier = util.Stack()
+    # explored = set()
+    # path = []
+    # trace =  []
+    #
+    # if problem.isGoalState(problem.getStartState()): return []
+    # explored.add(problem.getStartState())
+    # trace.append(0)
+    # for child in problem.getSuccessors(problem.getStartState()):
+    #     frontier.push(child)
+    #     trace[-1] += 1
+    # while not frontier.isEmpty():
+    #     node = frontier.pop()
+    #     explored.add(node[0])
+    #     path.append(node[1])
+    #     trace[-1] -= 1
+    #     if problem.isGoalState(node[0]):
+    #         # print node, "is the goal"
+    #         # print path
+    #         return path
+    #     trace.append(0)
+    #     for child in problem.getSuccessors(node[0]):
+    #         if child[0] not in explored:
+    #             frontier.push(child)
+    #             trace[-1] += 1
+    #     traceback = 0
+    #     while trace[-1] == 0:
+    #         trace = trace[:-1]
+    #         traceback += 1
+    #         # path = path[:-1]
+    #     # if traceback > 0:
+    #     #     print trace
+    #     #     print path
+    #     temp = []
+    #     while traceback > 0:
+    #         temp.append(Directions.REVERSE[path[-traceback]])
+    #         traceback -= 1
+    #     path.extend(temp[::-1])
+    #     # if traceback > 0:
+    #     #     temp = path[-traceback:]
+    #     #     print temp.reverse()
+    #     #     print Directions.REVERSE[temp[0]]
+    #     #     path.append([Directions.REVERSE[item] for item in temp.reverse()])
+    # #retuen FAILURE
+    return  [s, s, w, s, w, w, s, w]
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
