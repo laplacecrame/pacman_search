@@ -289,20 +289,70 @@ class CornersProblem(search.SearchProblem):
         # in initializing the problem
         "*** YOUR CODE HERE ***"
 
+        self.startState = map(lambda x: x==self.startingPosition, self.corners)
+        self.startState.append(self.startingPosition)
+        self.startState = tuple(self.startState)
+
+        # vertexs = list(self.corners)
+        # vertexs.append(self.startingPosition)
+        # self.distance = [range(5) for item in xrange(5)]
+        # for i in xrange(5):
+        #     self.distance[i][i] = 0
+        #     for j in xrange(i+1, 5):
+        #         self.distance[i][j] = util.manhattanDistance(vertexs[i],vertexs[j])
+        #         extraDistance = 0
+        #         self.distance[i][j] += extraDistance
+
+        # self.startState = map(lambda x: x==self.startingPosition, self.corners)
+        # self.startState.append(self.startState.index(True) if True in self.startState else 4)
+        # self.startState = tuple(self.startState)
+        #
+        # # print self.startState
+        #
+        # self.firstActions = dict()
+        # self.Actions = [range(4) for item in xrange(4)]
+        # for corner in self.corners:
+        #     subprob = PositionSearchProblem(startingGameState, lambda x: 1, corner, self.startingPosition, False, False)
+        #     tempActions = search.aStarSearch(subprob, globals()['manhattanHeuristic'])
+        #     self.firstActions[corner] = (tempActions, subprob.getCostOfActions(tempActions))
+        # for i in xrange(4):
+        #     for j in xrange(i+1, 4):
+        #         subprob = PositionSearchProblem(startingGameState, lambda x: 1, self.corners[i], self.corners[j], False, False)
+        #         tempActions = search.aStarSearch(subprob, globals()['manhattanHeuristic'])
+        #         tempCosts = subprob.getCostOfActions(tempActions)
+        #         self.Actions[i][j] = (tempActions, tempCosts)
+        #         tempActions = map(lambda x: Directions.REVERSE[x], self.Actions[i][j][0][::-1])
+        #         self.Actions[j][i] = (tempActions,tempCosts)
+        #
+        #         # print self.corners[j], "to", self.corners[i], self.Actions[i][j]
+        #         # print self.corners[i], "to", self.corners[j], self.Actions[j][i]
+
     def getStartState(self):
         """
         Returns the start state (in your state space, not the full Pacman state
         space)
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        # util.raiseNotDefined()
+        return self.startState
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        # util.raiseNotDefined()
+        isGoal = all(state[:-1])
+
+        # # For display purposes only
+        # if isGoal and self.visualize:
+        #     self._visitedlist.append(state)
+        #     import __main__
+        #     if '_display' in dir(__main__):
+        #         if 'drawExpandedCells' in dir(__main__._display): #@UndefinedVariable
+        #             __main__._display.drawExpandedCells(self._visitedlist) #@UndefinedVariable
+
+        return isGoal
 
     def getSuccessors(self, state):
         """
@@ -323,9 +373,39 @@ class CornersProblem(search.SearchProblem):
             #   dx, dy = Actions.directionToVector(action)
             #   nextx, nexty = int(x + dx), int(y + dy)
             #   hitsWall = self.walls[nextx][nexty]
-
             "*** YOUR CODE HERE ***"
+            x, y = state[-1]
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            hitsWall = self.walls[nextx][nexty]
+            # print list(state)[:-1]
+            if not hitsWall:
+                nextVisitState = list(state)[:-1]
+                if ((nextx, nexty), False) in filter(lambda x: not x[1], zip(self.corners, state[:-1])):
+                    nextVisitState[self.corners.index((nextx, nexty))] = True
+                nextVisitState.append((nextx, nexty))
+                nextState = tuple(nextVisitState)
+                successor = (nextState, action, 1)
+                successors.append(successor)
 
+            # print successors
+        # if not any(state[:-1]):
+        #     for i in xrange(4):
+        #         nextState = list(state)
+        #         nextState[i] = True
+        #         nextState[4] = i
+        #         nextState = tuple(nextState)
+        #         successors.append( (nextState,) + self.firstActions[self.corners[i]] )
+        # else:
+        #     current = state[4]
+        #     for nextDot, nextSubGoal in filter(lambda x: not x[1], zip(range(4), state[:-1])):
+        #         nextState = list(state)
+        #         nextState[nextDot] = True
+        #         nextState[4] = nextDot
+        #         nextState = tuple(nextState)
+        #         successors.append( (nextState,) + self.Actions[nextDot][current] )
+
+        # print "successors:", successors
         self._expanded += 1 # DO NOT CHANGE
         return successors
 
@@ -358,9 +438,72 @@ def cornersHeuristic(state, problem):
     """
     corners = problem.corners # These are the corner coordinates
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
-
     "*** YOUR CODE HERE ***"
-    return 0 # Default to trivial solution
+    result = 0
+    current = state[4]
+    tempState = list(state[:-1])
+    while not all(tempState):
+        distance = []
+        for corner, nextSubGoal in filter(lambda x: not x[1], zip(range(4), tempState)):
+            tempdistance = util.manhattanDistance(current, corners[corner])
+            extraDistance = 0
+            subGrid1 = walls[min(current[0], corners[corner][0]):max(current[0], corners[corner][0])][min(current[1], corners[corner][1]):max(current[1], corners[corner][1])]
+            subGrid2 = map(list, zip(*subGrid1))
+            extraDistance += 2 if any(map(all, subGrid1)) else 0
+            extraDistance += 2 if any(map(all, subGrid2)) else 0
+            tempdistance += extraDistance
+            distance.append((tempdistance, corner))
+            # print distance
+        delta, nextCorner = min(distance)
+        tempState[nextCorner] = True
+        current = corners[nextCorner]
+        result += delta
+
+        # distance, corner = min([(util.manhattanDistance(current, corners[nextDot]), nextDot) for nextDot, nextSubGoal in filter(lambda x: not x[1], zip(range(4), tempState))])
+        # extraDistance = 0
+        # # subGrid1 = grid[min(current[0], corners[corner][0]):max(current[0], corners[corner][0])][min(current[1], corners[corner][1]):max(current[1], corners[corner][1])]
+        # # subGrid2 = map(list, *subGrid1)
+        # # extraDistance += 2 if any(map(all, subGrid1)) else 0
+        # # extraDistance += 2 if any(map(all, subGrid2)) else 0
+        # distance += extraDistance
+        # result += distance
+        # tempState[corner] = True
+        # current = corners[corner]
+
+    # distance = []
+    # for corner, nextSubGoal in filter(lambda x: not x[1], zip(range(4), tempState)):
+    #     tempdistance = util.manhattanDistance(current, corners[corner])
+    #     extraDistance = 0
+    #     subGrid1 = walls[min(current[0], corners[corner][0]):max(current[0], corners[corner][0])][min(current[1], corners[corner][1]):max(current[1], corners[corner][1])]
+    #     subGrid2 = map(list, zip(*subGrid1))
+    #     extraDistance += 2 if any(map(all, subGrid1)) else 0
+    #     extraDistance += 2 if any(map(all, subGrid2)) else 0
+    #     tempdistance += extraDistance
+    #     distance.append(tempdistance)
+    #     # print distance
+    # result = min(distance) if len(distance)>0 else 0
+
+    return result
+
+    #
+    # result = 0
+    #
+    # current = state[4]
+    # tempState = list(state[:-1])
+    #
+    # # while not all(tempState):
+    # #     distance, corner = min([(problem.Actions[nextDot][current][1], nextDot) for nextDot, nextSubGoal in filter(lambda x: not x[1], zip(range(4), tempState))])
+    # #     result += distance
+    # #     tempState[corner] = True
+    # if not any(tempState):
+    #     print min([problem.firstActions[corners[i]][1] for i in xrange(4)])
+    #     return min([problem.firstActions[corners[i]][1] for i in xrange(4)])
+    #
+    # result = min([problem.Actions[nextDot][current][1] for nextDot, nextSubGoal in filter(lambda x: not x[1], zip(range(4), tempState))]) if not all(tempState) else 0
+    #
+    # # print state, "::::::", result
+    # return result
+    # # return 0 # Default to trivial solution
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"

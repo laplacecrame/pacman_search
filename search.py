@@ -195,7 +195,7 @@ def breadthFirstSearch(problem):
         if problem.isGoalState(node[0]):
             # print node, "is the goal"
             # print path
-            return node[3]
+            return reduce(lambda x,y: x+y, node[3]) if type(node[3][0]) is list else node[3]
         for child in problem.getSuccessors(node[0]):
             trace = list(node[3])
             trace.append(child[1])
@@ -289,7 +289,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
         if problem.isGoalState(node):
             # print node, "is the goal"
             # print path
-            return path[node]
+            return reduce(lambda x,y: x+y, path[node]) if type(path[node][0]) is list else path[node]
         for child in problem.getSuccessors(node):
             # trace = list(node[3])
             # trace.append(child[1])
